@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { base44 } from "@/api/base44Client";
+// import { base44 } from "@/api/base44Client"; // TODO: re-enable once an LLM provider is wired up on the backend
 import { resolveQuery } from "@/lib/searchKnowledge";
 
 export function useSearchEngine(query, filters) {
@@ -24,64 +24,65 @@ export function useSearchEngine(query, filters) {
     const local = resolveQuery(query);
     setState(s => ({ ...s, results: local, isLoading: true, aiAnswer: null, researchStudies: [] }));
 
-    // AI answer — debounced and cached
-    const key = query.trim().toLowerCase();
-    if (aiCacheRef.current[key]) {
-      setState(s => ({ ...s, isLoading: false, ...aiCacheRef.current[key] }));
-      return;
-    }
+    // AI answer — disabled until an LLM provider is wired up on the backend (see TODO above)
+    // const key = query.trim().toLowerCase();
+    // if (aiCacheRef.current[key]) {
+    //   setState(s => ({ ...s, isLoading: false, ...aiCacheRef.current[key] }));
+    //   return;
+    // }
+    //
+    // if (abortRef.current) clearTimeout(abortRef.current);
+    // abortRef.current = setTimeout(async () => {
+    //   try {
+    //     const ai = await base44.integrations.Core.InvokeLLM({
+    //       prompt: buildAIPrompt(query),
+    //       response_json_schema: {
+    //         type: "object",
+    //         properties: {
+    //           featured_snippet: { type: "string" },
+    //           direct_answer: { type: "string" },
+    //           related_searches: { type: "array", items: { type: "string" } },
+    //           intent: { type: "string", enum: ["peptide_info", "comparison", "goal_based", "how_to", "general"] },
+    //           research_studies: {
+    //             type: "array",
+    //             items: {
+    //               type: "object",
+    //               properties: {
+    //                 title: { type: "string" },
+    //                 authors: { type: "string" },
+    //                 journal: { type: "string" },
+    //                 year: { type: "string" },
+    //                 summary: { type: "string" },
+    //                 findings: { type: "string" },
+    //                 peptides: { type: "array", items: { type: "string" } },
+    //                 study_type: { type: "string" },
+    //                 pubmed_url: { type: "string" },
+    //                 doi: { type: "string" },
+    //               },
+    //               required: ["title", "summary", "findings", "peptides", "study_type"],
+    //             },
+    //           },
+    //         },
+    //         required: ["featured_snippet", "related_searches", "intent"],
+    //       },
+    //     });
+    //
+    //     const aiResult = {
+    //       featuredSnippet: ai.featured_snippet || null,
+    //       aiAnswer: ai.direct_answer || null,
+    //       relatedSearches: ai.related_searches?.slice(0, 6) || [],
+    //       researchStudies: ai.research_studies || [],
+    //     };
+    //
+    //     aiCacheRef.current[key] = aiResult;
+    //     setState(s => ({ ...s, isLoading: false, ...aiResult }));
+    //   } catch {
+    //     setState(s => ({ ...s, isLoading: false }));
+    //   }
+    // }, 600);
+    setState(s => ({ ...s, isLoading: false }));
 
-    if (abortRef.current) clearTimeout(abortRef.current);
-    abortRef.current = setTimeout(async () => {
-      try {
-        const ai = await base44.integrations.Core.InvokeLLM({
-          prompt: buildAIPrompt(query),
-          response_json_schema: {
-            type: "object",
-            properties: {
-              featured_snippet: { type: "string" },
-              direct_answer: { type: "string" },
-              related_searches: { type: "array", items: { type: "string" } },
-              intent: { type: "string", enum: ["peptide_info", "comparison", "goal_based", "how_to", "general"] },
-              research_studies: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    title: { type: "string" },
-                    authors: { type: "string" },
-                    journal: { type: "string" },
-                    year: { type: "string" },
-                    summary: { type: "string" },
-                    findings: { type: "string" },
-                    peptides: { type: "array", items: { type: "string" } },
-                    study_type: { type: "string" },
-                    pubmed_url: { type: "string" },
-                    doi: { type: "string" },
-                  },
-                  required: ["title", "summary", "findings", "peptides", "study_type"],
-                },
-              },
-            },
-            required: ["featured_snippet", "related_searches", "intent"],
-          },
-        });
-
-        const aiResult = {
-          featuredSnippet: ai.featured_snippet || null,
-          aiAnswer: ai.direct_answer || null,
-          relatedSearches: ai.related_searches?.slice(0, 6) || [],
-          researchStudies: ai.research_studies || [],
-        };
-
-        aiCacheRef.current[key] = aiResult;
-        setState(s => ({ ...s, isLoading: false, ...aiResult }));
-      } catch {
-        setState(s => ({ ...s, isLoading: false }));
-      }
-    }, 600);
-
-    return () => clearTimeout(abortRef.current);
+    return () => { if (abortRef.current) clearTimeout(abortRef.current); };
   }, [query]);
 
   return state;

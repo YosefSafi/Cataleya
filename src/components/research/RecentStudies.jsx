@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, ExternalLink, ChevronDown, ChevronUp, Calendar, FlaskRound } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronUp, Calendar, FlaskRound } from "lucide-react";
 
 const STUDIES = [
   {

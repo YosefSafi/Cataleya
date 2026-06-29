@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Calculator, FlaskRound, Droplets, Mail, CheckCircle2, ArrowRight } from "lucide-react";
+import { Calculator, FlaskRound, Mail, CheckCircle2 } from "lucide-react";
 import ProtocolWizard from "@/components/protocol/ProtocolWizard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

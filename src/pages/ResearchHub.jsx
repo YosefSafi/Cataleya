@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   TrendingUp, FlaskRound, Layers, Brain, Zap,
-  Activity, Heart, Dumbbell, Moon, Search, ChevronRight, Mic, X, Sparkles, Loader2, ArrowRight, Filter
+  Activity, Heart, Dumbbell, Moon, Search, ChevronRight, Mic, X, Sparkles, Loader2, Filter
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Package, ExternalLink, ChevronDown, Calculator, FlaskRound, Droplets, Syringe, ShieldCheck } from "lucide-react";
+import { ExternalLink, Droplets, Syringe, ShieldCheck } from "lucide-react";
 
 const PROTOCOL_WEEKS = [8, 12, 16];
 

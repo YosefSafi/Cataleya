@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, ChevronDown, ChevronUp, FlaskRound, Droplets, Calculator, Syringe, Thermometer, ShieldCheck, ArrowRight, CheckCircle2 } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronUp, FlaskRound, Droplets, Calculator, Syringe, Thermometer, ShieldCheck, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const SECTIONS = [

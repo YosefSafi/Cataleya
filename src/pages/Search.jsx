@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Mic, X, Clock, TrendingUp, Sparkles, ChevronRight, Filter, Loader2 } from "lucide-react";
+import { Search, Mic, X, Clock, TrendingUp, Sparkles, Filter, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import SearchResults from "@/components/search/SearchResults";

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { FlaskRound, ArrowRight, ArrowLeft, CheckCircle2, Mail, Lock, Sparkles, Info } from "lucide-react";
-import { base44 } from "@/api/base44Client";
+import { FlaskRound, ArrowRight, ArrowLeft, CheckCircle2, Lock, Sparkles, Info } from "lucide-react";
+// import { base44 } from "@/api/base44Client"; // TODO: re-enable once an LLM provider is wired up on the backend
 
 const GOALS = ["Fat Loss", "Muscle Gain", "Recovery", "Cognition", "Longevity", "Sleep", "Hormonal Health", "General Wellness", "Other"];
 const ACTIVITY = ["Sedentary", "Lightly Active", "Moderately Active", "Very Active", "Athlete"];
@@ -95,29 +95,32 @@ function ProtocolResult({ allData }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.integrations.Core.InvokeLLM({
-      prompt: `You are an expert peptide research protocol designer. Generate a detailed, personalised research protocol based on the following subject data. 
-
-IMPORTANT: This is for research purposes only, not medical advice.
-
-Subject data:
-${JSON.stringify(allData, null, 2)}
-
-Provide:
-1. Recommended compound(s) with rationale
-2. Suggested dosing protocol (dose, frequency, timing, route)
-3. Cycle length and off-cycle recommendation
-4. Storage and reconstitution reminders
-5. Key safety considerations based on health screening
-6. Synergy notes if multiple compounds are relevant
-7. Monitoring markers to track progress
-
-Be specific, practical, and concise. Format with clear sections.`,
-    }).then(res => {
-      setProtocol(res);
-      setLoading(false);
-    });
-  }, []);
+    // TODO: re-enable once an LLM provider is wired up on the backend. Example call:
+    // base44.integrations.Core.InvokeLLM({
+    //   prompt: `You are an expert peptide research protocol designer. Generate a detailed, personalised research protocol based on the following subject data.
+    //
+    // IMPORTANT: This is for research purposes only, not medical advice.
+    //
+    // Subject data:
+    // ${JSON.stringify(allData, null, 2)}
+    //
+    // Provide:
+    // 1. Recommended compound(s) with rationale
+    // 2. Suggested dosing protocol (dose, frequency, timing, route)
+    // 3. Cycle length and off-cycle recommendation
+    // 4. Storage and reconstitution reminders
+    // 5. Key safety considerations based on health screening
+    // 6. Synergy notes if multiple compounds are relevant
+    // 7. Monitoring markers to track progress
+    //
+    // Be specific, practical, and concise. Format with clear sections.`,
+    // }).then(res => {
+    //   setProtocol(res);
+    //   setLoading(false);
+    // });
+    setProtocol("Your custom protocol generation is temporarily unavailable while we finish setting up our research engine. Our team will email your personalised protocol shortly.");
+    setLoading(false);
+  }, [allData]);
 
   if (loading) {
     return (

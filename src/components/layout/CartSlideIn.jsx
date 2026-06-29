@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { X, Minus, Plus, ShoppingCart, EyeOff, Eye, Droplets, PlusCircle, CheckCircle2 } from "lucide-react";
+import { X, Minus, Plus, ShoppingCart, EyeOff, Eye, PlusCircle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 

@@ -1,7 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { FlaskRound, Building2, GraduationCap, Microscope, Store, Stethoscope, ShieldCheck, Truck, Clock, ArrowDown } from "lucide-react";
+import { FlaskRound, Building2, GraduationCap, Microscope, Store, Stethoscope, ShieldCheck, Truck, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const WHO_FOR = [

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ChevronDown, ChevronUp, ExternalLink, AlertTriangle, FlaskRound, Package, Syringe, BookOpen, Zap, ShieldCheck, Clock, Heart } from "lucide-react";
+import { ChevronDown, ChevronUp, ExternalLink, FlaskRound, Package, Syringe, BookOpen, ShieldCheck } from "lucide-react";
 
 // ─── Per-peptide guide data ───────────────────────────────────────────────────
 export const GUIDES = {

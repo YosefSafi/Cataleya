@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
-import { Star, Gift, TrendingUp, Award, Clock, ChevronRight, Loader2, Copy, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Star, Gift, TrendingUp, Award, Clock, Loader2, Copy, Check } from "lucide-react";
 
 const TIER_CONFIG = {
   "Researcher": { min: 0, max: 500, color: "bg-blue-100 text-blue-700 border-blue-200", barColor: "bg-blue-500", next: "Senior Researcher" },

@@ -1,5 +1,4 @@
 import React from "react";
-import { motion } from "framer-motion";
 import WholesaleHero from "@/components/wholesale/WholesaleHero";
 import WholesaleTiers from "@/components/wholesale/WholesaleTiers";
 import WholesaleQuoteBuilder from "@/components/wholesale/WholesaleQuoteBuilder";

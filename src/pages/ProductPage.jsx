@@ -29,7 +29,7 @@ const productImages = [
 ];
 
 export default function ProductPage() {
-  const { addToCart } = useOutletContext();
+  const { addToCart } = useOutletContext() || {};
 
   const handleAddToCart = (product) => {
     addToCart({

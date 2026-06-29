@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  FlaskRound, Clock, Thermometer, Droplets, BookOpen, Microscope,
-  Users, AlertTriangle, FileText, ChevronRight, ArrowLeft, Zap, Activity
+  FlaskRound, Clock, Thermometer, Droplets, BookOpen, Microscope, AlertTriangle, FileText, ChevronRight, ArrowLeft, Zap, Activity
 } from "lucide-react";
 import { ALL_PEPTIDES } from "@/components/stack/peptideData";
 import { trackPeptideView } from "@/components/research/ResearchSidebar";

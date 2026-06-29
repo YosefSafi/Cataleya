@@ -1,6 +1,6 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Plus, ShoppingCart, BookOpen, FlaskRound, Zap, AlertTriangle, Clock, Thermometer, ChevronRight, Download } from "lucide-react";
+import { X, ShoppingCart, BookOpen, FlaskRound, Zap, AlertTriangle, Clock, Thermometer, ChevronRight, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import jsPDF from "jspdf";
