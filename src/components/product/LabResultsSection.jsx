@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/apiClient";
 import { FileText, Upload, ExternalLink, Loader2, ShieldCheck, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,12 +17,14 @@ export default function LabResultsSection({ productId, productName }) {
 
   useEffect(() => {
     loadResults();
-    base44.auth.me().then(setUser).catch(() => {});
+    if (api.auth.isLoggedIn()) {
+      api.auth.me().then(setUser).catch(() => {});
+    }
   }, [productId]);
 
   const loadResults = async () => {
     setLoading(true);
-    const data = await base44.entities.LabResult.filter({ product_id: productId, is_visible: true }, "-test_date");
+    const data = await api.labResults.filter({ product_id: productId, is_visible: true });
     setResults(data);
     setLoading(false);
   };
@@ -30,8 +32,8 @@ export default function LabResultsSection({ productId, productName }) {
   const handleUpload = async () => {
     if (!pdfFile) return;
     setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file: pdfFile });
-    await base44.entities.LabResult.create({
+    const { file_url } = await api.uploadFile(pdfFile);
+    await api.labResults.create({
       product_id: productId,
       product_name: productName,
       lab_name: form.lab_name,

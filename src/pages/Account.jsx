@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { base44 } from "@/api/base44Client";
+import { api } from "@/api/apiClient";
 import { Star, Gift, TrendingUp, Award, Clock, Loader2, Copy, Check } from "lucide-react";
 
 const TIER_CONFIG = {
@@ -24,14 +24,14 @@ export default function Account() {
 
   useEffect(() => {
     const load = async () => {
-      const me = await base44.auth.me();
+      const me = await api.auth.me();
       setUser(me);
-      const accounts = await base44.entities.LoyaltyAccount.filter({ user_id: me.id });
+      const accounts = await api.loyaltyAccounts.filter({ user_id: me.id });
       if (accounts.length > 0) {
         setLoyalty(accounts[0]);
       } else {
         // Create a starter account with sample history
-        const created = await base44.entities.LoyaltyAccount.create({
+        const created = await api.loyaltyAccounts.create({
           user_id: me.id,
           points: 150,
           lifetime_points: 150,

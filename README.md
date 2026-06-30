@@ -1,39 +1,29 @@
-**Welcome to your Base44 project** 
+# Cattleya Labs
 
-**About**
+A React + Vite storefront for Cattleya Labs (research peptides), backed by a custom Express
+API in [`server/`](server/). Originally scaffolded with Base44; fully decoupled from it now.
 
-View and Edit  your app on [Base44.com](http://Base44.com) 
-
-This project contains everything you need to run your app locally.
-
-**Edit the code in your local development environment**
-
-Any change pushed to the repo will also be reflected in the Base44 Builder.
-
-**Prerequisites:** 
-
-1. Clone the repository using the project's Git URL 
-2. Navigate to the project directory
-3. Install dependencies: `npm install`
-4. Create an `.env.local` file and set the right environment variables
+## Frontend
 
 ```
-VITE_BASE44_APP_ID=your_app_id
-VITE_BASE44_APP_BASE_URL=your_backend_url
-
-e.g.
-VITE_BASE44_APP_ID=cbef744a8545c389ef439ea6
-VITE_BASE44_APP_BASE_URL=https://my-to-do-list-81bfaad7.base44.app
+npm install
+cp .env.example .env.local   # set VITE_API_BASE_URL to your running backend
+npm run dev
 ```
 
-Run the app: `npm run dev`
+`.env.local`:
 
-**Publish your changes**
+```
+VITE_API_BASE_URL=http://localhost:8080
+```
 
-Open [Base44.com](http://Base44.com) and click on Publish.
+## Backend
 
-**Docs & Support**
+See [`server/README.md`](server/README.md) for setup, local development, and Azure deployment
+instructions.
 
-Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
+## Deployment
 
-Support: [https://app.base44.com/support](https://app.base44.com/support)
+- Frontend: Azure Static Web Apps (see [`staticwebapp.config.json`](staticwebapp.config.json)
+  and [`.github/workflows/azure-static-web-apps.yml`](.github/workflows/azure-static-web-apps.yml)).
+- Backend: Azure App Service (Node).

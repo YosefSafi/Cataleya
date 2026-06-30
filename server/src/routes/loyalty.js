@@ -17,15 +17,21 @@ router.get("/", async (req, res) => {
 
 // POST /api/loyalty-accounts — a user may only create their own account
 router.post("/", async (req, res) => {
-  const { user_id, points = 0, tier = "bronze" } = req.body;
+  const { user_id, points = 0, lifetime_points = 0, tier = "Researcher", transactions = [] } = req.body;
   if (user_id !== req.user.id) {
     return res.status(403).json({ error: "Forbidden" });
   }
   const { rows } = await pool.query(
-    `INSERT INTO loyalty_accounts (user_id, points, tier) VALUES ($1, $2, $3)
-     ON CONFLICT (user_id) DO UPDATE SET points = EXCLUDED.points, tier = EXCLUDED.tier, updated_at = now()
+    `INSERT INTO loyalty_accounts (user_id, points, lifetime_points, tier, transactions)
+     VALUES ($1, $2, $3, $4, $5)
+     ON CONFLICT (user_id) DO UPDATE SET
+       points = EXCLUDED.points,
+       lifetime_points = EXCLUDED.lifetime_points,
+       tier = EXCLUDED.tier,
+       transactions = EXCLUDED.transactions,
+       updated_at = now()
      RETURNING *`,
-    [user_id, points, tier]
+    [user_id, points, lifetime_points, tier, JSON.stringify(transactions)]
   );
   res.status(201).json(rows[0]);
 });

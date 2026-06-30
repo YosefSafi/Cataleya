@@ -27,18 +27,19 @@ router.get("/", async (req, res) => {
   res.json(rows);
 });
 
-// POST /api/lab-results — requires auth (matches existing frontend behavior; consider
-// restricting to staff/admin accounts before going live, since any logged-in user can
-// currently submit a COA for any product).
+// POST /api/lab-results — admin only, matching the upload UI which is only shown to admins
 router.post("/", requireAuth, async (req, res) => {
-  const { product_id, product_name, test_date, file_url, is_visible = true } = req.body;
-  if (!product_id || !file_url) {
-    return res.status(400).json({ error: "product_id and file_url are required" });
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+  const { product_id, product_name, lab_name, batch_number, test_date, purity_percent, pdf_url, is_visible = true } = req.body;
+  if (!product_id || !pdf_url) {
+    return res.status(400).json({ error: "product_id and pdf_url are required" });
   }
   const { rows } = await pool.query(
-    `INSERT INTO lab_results (product_id, product_name, test_date, file_url, is_visible, uploaded_by)
-     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-    [product_id, product_name || null, test_date || null, file_url, is_visible, req.user.id]
+    `INSERT INTO lab_results (product_id, product_name, lab_name, batch_number, test_date, purity_percent, pdf_url, is_visible, uploaded_by)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+    [product_id, product_name || null, lab_name || null, batch_number || null, test_date || null, purity_percent || null, pdf_url, is_visible, req.user.id]
   );
   res.status(201).json(rows[0]);
 });

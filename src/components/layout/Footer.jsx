@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { api } from "@/api/apiClient";
 
 function NewsletterSignup() {
   const [email, setEmail] = useState("");
@@ -11,14 +12,7 @@ function NewsletterSignup() {
 
     setStatus("submitting");
     try {
-      // TODO: replace with real backend call, e.g.
-      // await base44.entities.NewsletterSubscriber.create({ email });
-      const stored = JSON.parse(localStorage.getItem("newsletter_subscribers") || "[]");
-      if (!stored.includes(email)) {
-        stored.push(email);
-        localStorage.setItem("newsletter_subscribers", JSON.stringify(stored));
-      }
-      console.log("[newsletter] subscribed:", email);
+      await api.newsletter.subscribe(email);
       setStatus("success");
       setEmail("");
     } catch (err) {
