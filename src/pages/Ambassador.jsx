@@ -71,6 +71,8 @@ export default function Ambassador() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // TODO: replace with a real backend call (e.g. POST /api/ambassador-applications) once one exists.
+    console.log("[ambassador] application submitted:", { platform, ...form });
     setSubmitted(true);
   };
 
