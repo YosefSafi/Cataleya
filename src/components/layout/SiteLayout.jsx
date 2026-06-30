@@ -1,12 +1,14 @@
 import React, { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import CartSlideIn from "./CartSlideIn";
 
 export default function SiteLayout() {
+  const navigate = useNavigate();
   const [cartOpen, setCartOpen] = useState(false);
   const [cartItems, setCartItems] = useState([]);
+  const [discreet, setDiscreet] = useState(false);
 
   const handleUpdateQty = (id, qty) => {
     if (qty <= 0) {
@@ -35,6 +37,13 @@ export default function SiteLayout() {
     setCartOpen(true);
   };
 
+  const clearCart = () => setCartItems([]);
+
+  const handleCheckout = () => {
+    setCartOpen(false);
+    navigate("/checkout");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar
@@ -42,7 +51,7 @@ export default function SiteLayout() {
         onCartClick={() => setCartOpen(true)}
       />
       <main id="main-content" tabIndex={-1} className="pt-16 lg:pt-20 outline-none">
-        <Outlet context={{ addToCart, cartItems }} />
+        <Outlet context={{ addToCart, cartItems, discreet, clearCart }} />
       </main>
       <Footer />
       <CartSlideIn
@@ -52,6 +61,9 @@ export default function SiteLayout() {
         onUpdateQty={handleUpdateQty}
         onRemove={handleRemove}
         onAddToCart={addToCart}
+        discreet={discreet}
+        onDiscreetChange={setDiscreet}
+        onCheckout={handleCheckout}
       />
     </div>
   );

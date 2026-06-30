@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { X, Minus, Plus, ShoppingCart, EyeOff, Eye, PlusCircle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,8 +11,7 @@ const BAC_WATER = {
   qty: 1,
 };
 
-export default function CartSlideIn({ open, onClose, items, onUpdateQty, onRemove, onAddToCart }) {
-  const [discreet, setDiscreet] = useState(false);
+export default function CartSlideIn({ open, onClose, items, onUpdateQty, onRemove, onAddToCart, discreet, onDiscreetChange, onCheckout }) {
   const total = items.reduce((sum, item) => sum + item.price * item.qty, 0);
 
   const hasPeptide = items.some((i) => i.id !== BAC_WATER.id);
@@ -147,7 +146,7 @@ export default function CartSlideIn({ open, onClose, items, onUpdateQty, onRemov
                 )}
                 {/* Discreet shipping toggle */}
                 <button
-                  onClick={() => setDiscreet(!discreet)}
+                  onClick={() => onDiscreetChange(!discreet)}
                   aria-pressed={discreet}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all text-left ${
                     discreet ? "border-primary bg-primary/5" : "border-border/60 bg-secondary/20"
@@ -168,7 +167,7 @@ export default function CartSlideIn({ open, onClose, items, onUpdateQty, onRemov
                     Your order includes preorder items. These will ship once back in stock.
                   </p>
                 )}
-                <Button className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-medium">
+                <Button onClick={onCheckout} className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-medium">
                   {hasPreorder ? "Confirm Preorder" : "Secure Checkout"} {discreet && "· Discreet"}
                 </Button>
               </div>

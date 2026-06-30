@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LogIn, Mail, Lock, Loader2 } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
-import GoogleIcon from "@/components/GoogleIcon";
+// import GoogleIcon from "@/components/GoogleIcon"; // re-enable with Google OAuth in a later release
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -28,9 +28,11 @@ export default function Login() {
     }
   };
 
-  const handleGoogle = () => {
-    api.auth.redirectToGoogle();
-  };
+  // Google OAuth deferred to a second release — see commented-out backend routes
+  // in server/src/routes/auth.js and the button below.
+  // const handleGoogle = () => {
+  //   api.auth.redirectToGoogle();
+  // };
 
   return (
     <AuthLayout
@@ -46,6 +48,7 @@ export default function Login() {
         </>
       }
     >
+      {/* Continue with Google — deferred to a second release
       <Button
         variant="outline"
         className="w-full h-12 text-sm font-medium mb-6"
@@ -63,6 +66,7 @@ export default function Login() {
           <span className="bg-card px-3 text-muted-foreground">or</span>
         </div>
       </div>
+      */}
 
       {error && (
         <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">

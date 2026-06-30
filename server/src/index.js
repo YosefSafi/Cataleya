@@ -9,6 +9,8 @@ import loyaltyRoutes from "./routes/loyalty.js";
 import labResultsRoutes from "./routes/labResults.js";
 import uploadRoutes from "./routes/upload.js";
 import newsletterRoutes from "./routes/newsletter.js";
+import ordersRoutes from "./routes/orders.js";
+import webhooksRoutes from "./routes/webhooks.js";
 
 const app = express();
 
@@ -19,6 +21,11 @@ app.use(
     credentials: true,
   })
 );
+
+// Mounted with a raw body parser (before express.json()) so the Coinbase webhook
+// signature can be verified against the exact bytes Coinbase sent.
+app.use("/api/webhooks", express.raw({ type: "application/json" }), webhooksRoutes);
+
 app.use(express.json());
 
 app.get("/health", (req, res) => res.json({ status: "ok" }));
@@ -28,6 +35,7 @@ app.use("/api/loyalty-accounts", loyaltyRoutes);
 app.use("/api/lab-results", labResultsRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/newsletter", newsletterRoutes);
+app.use("/api/orders", ordersRoutes);
 
 // Served only when STORAGE_PROVIDER=local; in production (STORAGE_PROVIDER=azure)
 // uploaded files are served directly from Azure Blob Storage instead.

@@ -28,6 +28,8 @@ export default function WholesaleApplicationForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // TODO: replace with a real backend call (e.g. POST /api/wholesale-applications) once one exists.
+    console.log("[wholesale] application submitted:", form);
     setSubmitted(true);
   };
 

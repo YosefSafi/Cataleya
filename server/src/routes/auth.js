@@ -1,7 +1,7 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import jwt from "jsonwebtoken";
+// import jwt from "jsonwebtoken"; // only used by the commented-out Google OAuth routes below
 import { z } from "zod";
 import rateLimit from "express-rate-limit";
 import { pool } from "../db/pool.js";
@@ -210,98 +210,102 @@ router.post("/reset-password", async (req, res) => {
   res.json({ message: "Password updated" });
 });
 
-// GET /api/auth/google — redirects to Google's consent screen
-router.get("/google", (req, res) => {
-  if (!process.env.GOOGLE_CLIENT_ID) {
-    return res.status(501).json({ error: "Google login is not configured on this server yet" });
-  }
-
-  // Stateless CSRF protection: a short-lived signed JWT we can verify on callback
-  // without needing server-side session storage.
-  const state = jwt.sign({ nonce: crypto.randomBytes(16).toString("hex") }, process.env.JWT_SECRET, {
-    expiresIn: "10m",
-  });
-
-  const params = new URLSearchParams({
-    client_id: process.env.GOOGLE_CLIENT_ID,
-    redirect_uri: process.env.GOOGLE_REDIRECT_URI,
-    response_type: "code",
-    scope: "openid email profile",
-    state,
-    prompt: "select_account",
-  });
-
-  res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
-});
-
-// GET /api/auth/google/callback — exchanges the code, finds-or-creates the user, redirects
-// back to the frontend with an access token in the URL for it to pick up.
-router.get("/google/callback", async (req, res) => {
-  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-  const { code, state } = req.query;
-
-  try {
-    jwt.verify(state, process.env.JWT_SECRET);
-  } catch {
-    return res.redirect(`${frontendUrl}/login?error=google_state_invalid`);
-  }
-  if (!code) {
-    return res.redirect(`${frontendUrl}/login?error=google_no_code`);
-  }
-
-  try {
-    const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        client_id: process.env.GOOGLE_CLIENT_ID,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        code,
-        redirect_uri: process.env.GOOGLE_REDIRECT_URI,
-        grant_type: "authorization_code",
-      }),
-    });
-    const tokenData = await tokenRes.json();
-    if (!tokenRes.ok) {
-      console.error("Google token exchange failed:", tokenData);
-      return res.redirect(`${frontendUrl}/login?error=google_token_exchange_failed`);
-    }
-
-    const profileRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-      headers: { Authorization: `Bearer ${tokenData.access_token}` },
-    });
-    const profile = await profileRes.json();
-    if (!profileRes.ok || !profile.email) {
-      return res.redirect(`${frontendUrl}/login?error=google_profile_failed`);
-    }
-
-    const existing = await pool.query(
-      "SELECT id FROM users WHERE google_id = $1 OR email = $2",
-      [profile.sub, profile.email]
-    );
-
-    let userId;
-    if (existing.rows.length > 0) {
-      userId = existing.rows[0].id;
-      await pool.query(
-        "UPDATE users SET google_id = $1, email_verified = TRUE, full_name = COALESCE(full_name, $2) WHERE id = $3",
-        [profile.sub, profile.name || null, userId]
-      );
-    } else {
-      const inserted = await pool.query(
-        `INSERT INTO users (email, google_id, email_verified, full_name)
-         VALUES ($1, $2, TRUE, $3) RETURNING id`,
-        [profile.email, profile.sub, profile.name || null]
-      );
-      userId = inserted.rows[0].id;
-    }
-
-    const access_token = signToken(userId);
-    res.redirect(`${frontendUrl}/auth/callback?token=${access_token}`);
-  } catch (err) {
-    console.error("Google OAuth callback failed:", err);
-    res.redirect(`${frontendUrl}/login?error=google_unexpected`);
-  }
-});
+// Google OAuth — deferred to a second release. Code kept here, commented out, since it
+// was already built and tested for the redirect/state/501-when-unconfigured behavior;
+// just needs GOOGLE_CLIENT_ID/SECRET and re-enabling when it's prioritized.
+//
+// // GET /api/auth/google — redirects to Google's consent screen
+// router.get("/google", (req, res) => {
+//   if (!process.env.GOOGLE_CLIENT_ID) {
+//     return res.status(501).json({ error: "Google login is not configured on this server yet" });
+//   }
+//
+//   // Stateless CSRF protection: a short-lived signed JWT we can verify on callback
+//   // without needing server-side session storage.
+//   const state = jwt.sign({ nonce: crypto.randomBytes(16).toString("hex") }, process.env.JWT_SECRET, {
+//     expiresIn: "10m",
+//   });
+//
+//   const params = new URLSearchParams({
+//     client_id: process.env.GOOGLE_CLIENT_ID,
+//     redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+//     response_type: "code",
+//     scope: "openid email profile",
+//     state,
+//     prompt: "select_account",
+//   });
+//
+//   res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
+// });
+//
+// // GET /api/auth/google/callback — exchanges the code, finds-or-creates the user, redirects
+// // back to the frontend with an access token in the URL for it to pick up.
+// router.get("/google/callback", async (req, res) => {
+//   const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+//   const { code, state } = req.query;
+//
+//   try {
+//     jwt.verify(state, process.env.JWT_SECRET);
+//   } catch {
+//     return res.redirect(`${frontendUrl}/login?error=google_state_invalid`);
+//   }
+//   if (!code) {
+//     return res.redirect(`${frontendUrl}/login?error=google_no_code`);
+//   }
+//
+//   try {
+//     const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/x-www-form-urlencoded" },
+//       body: new URLSearchParams({
+//         client_id: process.env.GOOGLE_CLIENT_ID,
+//         client_secret: process.env.GOOGLE_CLIENT_SECRET,
+//         code,
+//         redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+//         grant_type: "authorization_code",
+//       }),
+//     });
+//     const tokenData = await tokenRes.json();
+//     if (!tokenRes.ok) {
+//       console.error("Google token exchange failed:", tokenData);
+//       return res.redirect(`${frontendUrl}/login?error=google_token_exchange_failed`);
+//     }
+//
+//     const profileRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+//       headers: { Authorization: `Bearer ${tokenData.access_token}` },
+//     });
+//     const profile = await profileRes.json();
+//     if (!profileRes.ok || !profile.email) {
+//       return res.redirect(`${frontendUrl}/login?error=google_profile_failed`);
+//     }
+//
+//     const existing = await pool.query(
+//       "SELECT id FROM users WHERE google_id = $1 OR email = $2",
+//       [profile.sub, profile.email]
+//     );
+//
+//     let userId;
+//     if (existing.rows.length > 0) {
+//       userId = existing.rows[0].id;
+//       await pool.query(
+//         "UPDATE users SET google_id = $1, email_verified = TRUE, full_name = COALESCE(full_name, $2) WHERE id = $3",
+//         [profile.sub, profile.name || null, userId]
+//       );
+//     } else {
+//       const inserted = await pool.query(
+//         `INSERT INTO users (email, google_id, email_verified, full_name)
+//          VALUES ($1, $2, TRUE, $3) RETURNING id`,
+//         [profile.email, profile.sub, profile.name || null]
+//       );
+//       userId = inserted.rows[0].id;
+//     }
+//
+//     const access_token = signToken(userId);
+//     res.redirect(`${frontendUrl}/auth/callback?token=${access_token}`);
+//   } catch (err) {
+//     console.error("Google OAuth callback failed:", err);
+//     res.redirect(`${frontendUrl}/login?error=google_unexpected`);
+//   }
+// });
 
 export default router;

@@ -67,9 +67,11 @@ export const api = {
     async resetPassword(resetToken, newPassword) {
       return request("/api/auth/reset-password", { method: "POST", body: { resetToken, newPassword } });
     },
-    redirectToGoogle() {
-      window.location.href = `${API_BASE_URL}/api/auth/google`;
-    },
+    // Google OAuth deferred to a second release — backend routes are commented out
+    // in server/src/routes/auth.js.
+    // redirectToGoogle() {
+    //   window.location.href = `${API_BASE_URL}/api/auth/google`;
+    // },
     setToken,
     getToken,
     isLoggedIn() {
@@ -107,6 +109,24 @@ export const api = {
   newsletter: {
     async subscribe(email) {
       return request("/api/newsletter/subscribe", { method: "POST", body: { email } });
+    },
+  },
+
+  orders: {
+    async paymentConfig() {
+      return request("/api/orders/payment-config");
+    },
+    async create(payload) {
+      return request("/api/orders", { method: "POST", body: payload });
+    },
+    async get(id) {
+      return request(`/api/orders/${id}`);
+    },
+    async cryptoCheckout(id) {
+      return request(`/api/orders/${id}/crypto-checkout`, { method: "POST" });
+    },
+    async simulatePaid(id) {
+      return request(`/api/orders/${id}/simulate-paid`, { method: "POST" });
     },
   },
 };

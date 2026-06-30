@@ -12,7 +12,7 @@ import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
-import AuthCallback from '@/pages/AuthCallback';
+// import AuthCallback from '@/pages/AuthCallback'; // only used by Google OAuth, deferred to a later release
 
 // Site pages
 import SiteLayout from '@/components/layout/SiteLayout';
@@ -37,6 +37,9 @@ import Wholesale from '@/pages/Wholesale';
 import SearchPage from '@/pages/Search';
 import Account from '@/pages/Account';
 import BacWaterPage from '@/pages/BacWaterPage';
+import Checkout from '@/pages/Checkout';
+import OrderStatus from '@/pages/OrderStatus';
+import DevCryptoStub from '@/pages/DevCryptoStub';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth } = useAuth();
@@ -60,7 +63,7 @@ const AuthenticatedApp = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/auth/callback" element={<AuthCallback />} />
+      {/* <Route path="/auth/callback" element={<AuthCallback />} /> only used by Google OAuth, deferred */}
 
       {/* Public site routes */}
       <Route element={<SiteLayout />}>
@@ -85,6 +88,9 @@ const AuthenticatedApp = () => {
         <Route path="/wholesale" element={<Wholesale />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/product/bac-water" element={<BacWaterPage />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/order/:id" element={<OrderStatus />} />
+        <Route path="/dev/crypto-stub/:id" element={<DevCryptoStub />} />
 
         {/* Requires login — redirects to /login if not authenticated */}
         <Route element={<ProtectedRoute unauthenticatedElement={<RedirectToLogin />} />}>

@@ -1,7 +1,8 @@
 # Cattleya Labs API
 
 Express backend replacing the Base44 SDK calls in the frontend: auth (register/OTP/login/reset),
-loyalty accounts, lab result (COA) storage, file uploads, and newsletter signups.
+loyalty accounts, lab result (COA) storage, file uploads, newsletter signups, and order
+checkout (Zelle + crypto via Coinbase Commerce).
 
 ## Local development
 
@@ -31,12 +32,49 @@ develop locally.
 | GET    | /api/loyalty-accounts?user_id= | Yes  | User may only read/write their own account |
 | POST   | /api/loyalty-accounts          | Yes  | |
 | GET    | /api/lab-results?product_id=   | No   | Public, used to render COAs on product pages |
-| POST   | /api/lab-results               | Yes  | Any authenticated user can submit one — matches current frontend behavior, but **restrict to staff/admin before launch** |
+| POST   | /api/lab-results               | Admin only | For release 1, lab results are inserted directly into the `lab_results` table instead — this endpoint exists but isn't exercised by the UI flow |
 | POST   | /api/upload                    | Yes  | multipart `file` field, returns `{ file_url }` |
 | POST   | /api/newsletter/subscribe      | No   | Idempotent |
+| GET    | /api/orders/payment-config     | No   | Returns the Zelle recipient info shown at checkout |
+| POST   | /api/orders                    | No*  | Creates an order (guest checkout allowed). *Linked to the caller's account if a valid token is present |
+| GET    | /api/orders/:id                | No   | Order id is an unguessable UUID, used as the confirmation/payment-instructions link |
+| POST   | /api/orders/:id/crypto-checkout | No  | Creates a Coinbase Commerce charge (or a local stub in dev), returns `{ hosted_url }` |
+| POST   | /api/orders/:id/simulate-paid  | No   | Dev-only — marks an order paid without a real payment. 404s unless `CRYPTO_PROVIDER` is unset/stub |
+| POST   | /api/webhooks/coinbase         | No   | Coinbase Commerce webhook, marks orders paid on `charge:confirmed`. HMAC-verified against `COINBASE_COMMERCE_WEBHOOK_SECRET` |
 
-Google OAuth login (`loginWithProvider("google")` in the frontend) is **not implemented** —
-that needs a Google OAuth app registered and a callback flow, deferred for now.
+### Checkout payment methods
+
+**Zelle** has no merchant API — there's no way to verify a Zelle payment automatically. The
+checkout flow shows the customer your Zelle email/name and the order's short ID as a memo, then
+the order sits in `pending_payment` until you see the money land and mark it paid yourself:
+`UPDATE orders SET status = 'paid' WHERE id = '...';`
+
+**Crypto** goes through [Coinbase Commerce](https://commerce.coinbase.com/), which *does* confirm
+automatically via webhook. Locally, with `CRYPTO_PROVIDER` unset (the default), checkout instead
+redirects to a stub page at `/dev/crypto-stub/:id` in the frontend with a "Simulate Payment
+Confirmed" button — this lets you exercise the entire order flow without a Coinbase account. To
+go live: create a Coinbase Commerce account, set `CRYPTO_PROVIDER=coinbase`,
+`COINBASE_COMMERCE_API_KEY` (Settings → API keys), and `COINBASE_COMMERCE_WEBHOOK_SECRET`
+(Settings → Webhook subscriptions — point it at `<your-api-url>/api/webhooks/coinbase`).
+
+**Stripe (cards/Google Pay/Apple Pay) is deliberately not implemented** — Stripe's terms
+prohibit many research-chemical businesses, and peptide vendors get declined or shut down
+regularly. Revisit this in a later release if you set up an account with a processor that
+explicitly allows the business.
+
+Order prices are currently trusted from the client (the shop's product list lives in the
+frontend, there's no backend product catalog yet) — fine for a first release with manually
+confirmed payments, but worth hardening with a server-side price catalog before this scales.
+
+Google OAuth login is implemented but **commented out** in `src/routes/auth.js` — deferred to a
+second release. To re-enable: uncomment the `/google` and `/google/callback` routes (and the
+`jwt` import above them), uncomment the "Continue with Google" button + handler in the
+frontend's `Login.jsx`/`Register.jsx` and `redirectToGoogle()` in `apiClient.js`, restore the
+`/auth/callback` route in `App.jsx`, and set `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` from
+[Google Cloud Console](https://console.cloud.google.com/apis/credentials).
+
+To promote a user to admin (so they can use the lab-results upload UI, gated by `role`), update
+the database directly: `UPDATE users SET role = 'admin' WHERE email = '...';`
 
 ## Deploying to Azure App Service
 

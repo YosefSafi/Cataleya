@@ -8,9 +8,14 @@ import { Mail, MapPin, Send } from "lucide-react";
 
 export default function Contact() {
   const [sent, setSent] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+
+  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // TODO: replace with a real backend call (e.g. POST /api/contact) once one exists.
+    console.log("[contact] message submitted:", form);
     setSent(true);
   };
 
@@ -59,20 +64,20 @@ export default function Contact() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label className="text-xs">Name</Label>
-                  <Input placeholder="Your name" required className="h-11" />
+                  <Input placeholder="Your name" value={form.name} onChange={(e) => set("name", e.target.value)} required className="h-11" />
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">Email</Label>
-                  <Input type="email" placeholder="you@example.com" required className="h-11" />
+                  <Input type="email" placeholder="you@example.com" value={form.email} onChange={(e) => set("email", e.target.value)} required className="h-11" />
                 </div>
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Subject</Label>
-                <Input placeholder="How can we help?" required className="h-11" />
+                <Input placeholder="How can we help?" value={form.subject} onChange={(e) => set("subject", e.target.value)} required className="h-11" />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Message</Label>
-                <Textarea placeholder="Tell us more..." rows={5} required />
+                <Textarea placeholder="Tell us more..." rows={5} value={form.message} onChange={(e) => set("message", e.target.value)} required />
               </div>
               <Button type="submit" className="h-11 px-8 bg-primary hover:bg-primary/90 text-primary-foreground">
                 Send Message
