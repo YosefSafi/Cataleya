@@ -1,10 +1,13 @@
 import express from "express";
 import jwt from "jsonwebtoken";
+import rateLimit from "express-rate-limit";
 import { z } from "zod";
 import { pool } from "../db/pool.js";
 import { createCryptoCharge, isStubMode } from "../lib/crypto-payments.js";
+import { sendOrderPlacedEmail, sendOrderPaidEmail } from "../lib/orderEmails.js";
 
 const router = express.Router();
+router.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 30 }));
 
 // GET /api/orders/payment-config — public, exposes the Zelle instructions shown at checkout
 router.get("/payment-config", (req, res) => {
@@ -75,7 +78,10 @@ router.post("/", async (req, res) => {
     [userId, email, full_name, shipping_address, JSON.stringify(items), subtotal, total, discreet, payment_method]
   );
 
-  res.status(201).json(rows[0]);
+  const order = rows[0];
+  sendOrderPlacedEmail(order).catch((err) => console.error("Failed to send order-placed email:", err));
+
+  res.status(201).json(order);
 });
 
 // GET /api/orders/:id — public; the id is an unguessable UUID, used as the order's
@@ -133,7 +139,10 @@ router.post("/:id/simulate-paid", async (req, res) => {
   if (rows.length === 0) {
     return res.status(404).json({ error: "Order not found" });
   }
-  res.json(rows[0]);
+  const order = rows[0];
+  sendOrderPaidEmail(order).catch((err) => console.error("Failed to send order-paid email:", err));
+
+  res.json(order);
 });
 
 export default router;
