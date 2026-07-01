@@ -128,5 +128,12 @@ export const api = {
     async simulatePaid(id) {
       return request(`/api/orders/${id}/simulate-paid`, { method: "POST" });
     },
+    async adminList(status) {
+      const params = status ? `?status=${encodeURIComponent(status)}` : "";
+      return request(`/api/orders/admin/list${params}`);
+    },
+    async markPaid(id) {
+      return request(`/api/orders/${id}/mark-paid`, { method: "POST" });
+    },
   },
 };

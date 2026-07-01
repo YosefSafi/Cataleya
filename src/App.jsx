@@ -40,6 +40,7 @@ import BacWaterPage from '@/pages/BacWaterPage';
 import Checkout from '@/pages/Checkout';
 import OrderStatus from '@/pages/OrderStatus';
 import DevCryptoStub from '@/pages/DevCryptoStub';
+import AdminOrders from '@/pages/AdminOrders';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth } = useAuth();
@@ -92,9 +93,12 @@ const AuthenticatedApp = () => {
         <Route path="/order/:id" element={<OrderStatus />} />
         <Route path="/dev/crypto-stub/:id" element={<DevCryptoStub />} />
 
-        {/* Requires login — redirects to /login if not authenticated */}
+        {/* Requires login — redirects to /login if not authenticated.
+            AdminOrders does its own role check and shows an "admin required" message
+            for non-admins, so it only needs the login gate here. */}
         <Route element={<ProtectedRoute unauthenticatedElement={<RedirectToLogin />} />}>
           <Route path="/account" element={<Account />} />
+          <Route path="/admin/orders" element={<AdminOrders />} />
         </Route>
       </Route>
 

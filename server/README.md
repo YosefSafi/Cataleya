@@ -40,14 +40,18 @@ develop locally.
 | GET    | /api/orders/:id                | No   | Order id is an unguessable UUID, used as the confirmation/payment-instructions link |
 | POST   | /api/orders/:id/crypto-checkout | No  | Creates a Coinbase Commerce charge (or a local stub in dev), returns `{ hosted_url }` |
 | POST   | /api/orders/:id/simulate-paid  | No   | Dev-only — marks an order paid without a real payment. 404s unless `CRYPTO_PROVIDER` is unset/stub |
+| GET    | /api/orders/admin/list?status= | Admin | Lists orders (newest first, optional status filter) for the `/admin/orders` page |
+| POST   | /api/orders/:id/mark-paid      | Admin | Manually confirm a payment (used for Zelle). Idempotent, emails the customer on the transition to paid |
 | POST   | /api/webhooks/coinbase         | No   | Coinbase Commerce webhook, marks orders paid on `charge:confirmed`. HMAC-verified against `COINBASE_COMMERCE_WEBHOOK_SECRET` |
 
 ### Checkout payment methods
 
 **Zelle** has no merchant API — there's no way to verify a Zelle payment automatically. The
 checkout flow shows the customer your Zelle email/name and the order's short ID as a memo, then
-the order sits in `pending_payment` until you see the money land and mark it paid yourself:
-`UPDATE orders SET status = 'paid' WHERE id = '...';`
+the order sits in `pending_payment` until you see the money land and mark it paid. Do that from
+the **`/admin/orders` page** (log in as an admin user, filter to Pending Payment, match by the
+memo/short ID, click "Mark Paid" — this also emails the customer their confirmation). You can
+still fall back to SQL if needed: `UPDATE orders SET status = 'paid' WHERE id = '...';`
 
 **Crypto** goes through [Coinbase Commerce](https://commerce.coinbase.com/), which *does* confirm
 automatically via webhook. Locally, with `CRYPTO_PROVIDER` unset (the default), checkout instead

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { pool } from "../db/pool.js";
 import { createCryptoCharge, isStubMode } from "../lib/crypto-payments.js";
 import { sendOrderPlacedEmail, sendOrderPaidEmail } from "../lib/orderEmails.js";
+import { requireAuth } from "../middleware/auth.js";
 
 const router = express.Router();
 router.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 30 }));
@@ -41,6 +42,14 @@ const createOrderSchema = z.object({
   discreet: z.boolean().optional().default(false),
   payment_method: z.enum(["zelle", "crypto"]),
 });
+
+// Admin gate — used by the order-management routes below.
+function requireAdmin(req, res, next) {
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+  next();
+}
 
 // Best-effort: if an Authorization header is present and valid, link the order to that
 // user; otherwise proceed as a guest checkout. Never rejects the request.
@@ -82,6 +91,45 @@ router.post("/", async (req, res) => {
   sendOrderPlacedEmail(order).catch((err) => console.error("Failed to send order-placed email:", err));
 
   res.status(201).json(order);
+});
+
+// GET /api/orders/admin/list?status=pending_payment — admin only. Lists orders newest
+// first, optionally filtered by status. Declared before "/:id" so that path doesn't
+// capture "admin".
+router.get("/admin/list", requireAuth, requireAdmin, async (req, res) => {
+  const { status } = req.query;
+  const params = [];
+  let where = "";
+  if (status) {
+    params.push(status);
+    where = `WHERE status = $${params.length}`;
+  }
+  const { rows } = await pool.query(
+    `SELECT * FROM orders ${where} ORDER BY created_at DESC LIMIT 200`,
+    params
+  );
+  res.json(rows);
+});
+
+// POST /api/orders/:id/mark-paid — admin only. Used to confirm Zelle payments by hand
+// (and as a manual fallback for crypto). Idempotent: only emails on the transition to paid.
+router.post("/:id/mark-paid", requireAuth, requireAdmin, async (req, res) => {
+  const { rows } = await pool.query(
+    `UPDATE orders SET status = 'paid', updated_at = now()
+     WHERE id = $1 AND status != 'paid' RETURNING *`,
+    [req.params.id]
+  );
+  if (rows.length === 0) {
+    // Either the order doesn't exist or it was already paid — distinguish the two.
+    const existing = await pool.query("SELECT * FROM orders WHERE id = $1", [req.params.id]);
+    if (existing.rows.length === 0) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+    return res.json(existing.rows[0]); // already paid, no-op
+  }
+  const order = rows[0];
+  sendOrderPaidEmail(order).catch((err) => console.error("Failed to send order-paid email:", err));
+  res.json(order);
 });
 
 // GET /api/orders/:id — public; the id is an unguessable UUID, used as the order's
